@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>실시간 단어 찾기 게임</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f7ff;
+      color: #222;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #6c8cff, #9f7cff);
+      color: white;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #5b7cff;
+      color: white;
+    }
+
+    button.secondary {
+      background: #eef1ff;
+      color: #3043a0;
+    }
+
+    button.danger {
+      background: #ff5b6e;
+    }
+
+    button.good {
+      background: #35b779;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .intervalBtn.active {
+      background: #3043a0;
+      color: white;
+      outline: 3px solid #cdd5ff;
+    }
+
+    input,
+    select {
+      border: 2px solid #d8defa;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      min-width: 180px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .screen-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 12px;
+      background: #f0f3ff;
+      font-weight: 700;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .timer {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ff4e6a;
+    }
+
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .word-card {
+      min-height: 78px;
+      border-radius: 18px;
+      background: white;
+      border: 3px solid #dfe4ff;
+      color: #222;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .word-card.clicked {
+      background: #eeeeee;
+      color: #999;
+      border-color: #ddd;
+    }
+
+    .score-big {
+      font-size: 34px;
+      font-weight: 900;
+      color: #3043a0;
+    }
+
+    .player-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f7f8ff;
+      font-weight: 800;
+    }
+
+    .winner-box {
+      text-align: center;
+      padding: 24px;
+      border-radius: 22px;
+      background: #fff6d7;
+      border: 3px solid #ffd45a;
+    }
+
+    .winner-box h2 {
+      font-size: 34px;
+      margin: 0 0 12px;
+    }
+
+    .rank-line {
+      font-size: 24px;
+      font-weight: 900;
+      margin: 8px 0;
+    }
+
+    @media (max-width: 700px) {
+      .word-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .word-card {
+        font-size: 20px;
+        min-height: 68px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>실시간 단어 찾기 게임</h1>
+    <p>정답 단어 클릭 +1점 / 오답 단어 클릭 -1점</p>
+  </header>
+
+  <main>
+    <section id="startScreen" class="card">
+      <div class="screen-title">입장 선택</div>
+      <div class="row">
+        <button id="showTeacherBtn">강사로 입장</button>
+        <button id="showPlayerBtn" class="good">참여자로 입장</button>
+      </div>
+      <div id="startStatus" class="status">Firebase 연결 준비 중...</div>
+    </section>
+
+    <section id="teacherLoginScreen" class="card hidden">
+      <div class="screen-title">강사 입장</div>
+      <p>강사 비밀번호는 화면에 보이지 않도록 password 형식으로 입력합니다.</p>
+      <div class="row">
+        <input id="teacherPasswordInput" type="password" placeholder="강사 비밀번호" />
+        <button id="teacherLoginBtn">확인</button>
+        <button id="backFromTeacherBtn" class="secondary">뒤로</button>
+      </div>
+      <div id="teacherLoginStatus" class="status">
+        비밀번호는 index.html에 저장하지 않습니다.
+      </div>
+    </section>
+
+    <section id="playerLoginScreen" class="card hidden">
+      <div class="screen-title">참여자 입장</div>
+      <div class="row">
+        <input id="nicknameInput" type="text" placeholder="이름 또는 닉네임" />
+        <button id="joinPlayerBtn">입장하기</button>
+        <button id="backFromPlayerBtn" class="secondary">뒤로</button>
+      </div>
+      <div id="playerLoginStatus" class="status">
+        로그인 없이 닉네임만 입력합니다.
+      </div>
+    </section>
+
+    <section id="teacherScreen" class="hidden">
+      <div class="card">
+        <div class="screen-title">강사 화면</div>
+
+        <div class="row">
+          <label>
+            주제:
+            <select id="categorySelect">
+              <option value="fruit">과일</option>
+              <option value="animal">동물</option>
+              <option value="country">나라</option>
+              <option value="flower">꽃</option>
+              <option value="goodword">좋은말</option>
+            </select>
+          </label>
+
+          <button class="secondary intervalBtn" data-interval="3000">3초</button>
+          <button class="secondary intervalBtn active" data-interval="5000">5초</button>
+          <button class="secondary intervalBtn" data-interval="10000">10초</button>
+        </div>
+
+        <div class="row" style="margin-top: 14px;">
+          <button id="startGameBtn" class="good">게임 시작</button>
+          <button id="stopGameBtn" class="danger">게임 종료</button>
+          <button id="resetGameBtn" class="secondary">초기화</button>
+        </div>
+
+        <div class="status">
+          현재 주제: <span id="teacherCategoryText">과일</span> /
+          단어 변경: <span id="teacherIntervalText">5초</span> /
+          남은 시간: <span id="teacherTimer" class="timer">60</span>초
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="screen-title">참가자 점수판</div>
+        <div id="teacherPlayers" class="player-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="screen-title">현재 단어판 미리보기</div>
+        <div id="teacherWordGrid" class="word-grid"></div>
+      </div>
+    </section>
+
+    <section id="playerScreen" class="hidden">
+      <div class="card">
+        <div class="screen-title">참여자 화면</div>
+        <div>내 이름: <strong id="myNameText">-</strong></div>
+        <div>내 점수: <span id="myScoreText" class="score-big">0</span></div>
+        <div class="status">
+          현재 주제: <span id="playerCategoryText">대기 중</span> /
+          남은 시간: <span id="playerTimer" class="timer">60</span>초
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="screen-title">단어를 클릭하세요</div>
+        <div id="playerGuide" class="status">
+          강사가 게임을 시작하면 단어가 나타납니다.
+        </div>
+        <div id="playerWordGrid" class="word-grid"></div>
+      </div>
+    </section>
+
+    <section id="gameOverScreen" class="card hidden">
+      <div class="winner-box">
+        <h2>🎉 게임 종료 🎉</h2>
+        <div id="winnerList"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    import {
+      getDatabase,
+      ref,
+      set,
+      update,
+      onValue,
+      runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIlplwqdZREFbJnlBBHEOuGhFjF4xXBtE",
+      authDomain: "word-finder-game-fd9db.firebaseapp.com",
+      databaseURL: "https://word-finder-game-fd9db-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "word-finder-game-fd9db",
+      storageBucket: "word-finder-game-fd9db.firebasestorage.app",
+      messagingSenderId: "418145826950",
+      appId: "1:418145826950:web:462073d89b48c1f39ef907"
+    };
+
+    const ROOM_ID = "main";
+    const GAME_TIME = 60;
+
+    const WORDS = {
+      fruit: {
+        label: "과일",
+        correct: ["사과", "바나나", "포도", "딸기", "수박", "복숭아", "귤", "참외", "키위", "망고"]
+      },
+      animal: {
+        label: "동물",
+        correct: ["강아지", "고양이", "사자", "호랑이", "토끼", "코끼리", "기린", "원숭이", "곰", "여우"]
+      },
+      country: {
+        label: "나라",
+        correct: ["한국", "일본", "중국", "미국", "프랑스", "영국", "독일", "캐나다", "호주", "브라질"]
+      },
+      flower: {
+        label: "꽃",
+        correct: ["장미", "튤립", "해바라기", "국화", "민들레", "벚꽃", "목련", "진달래", "라벤더", "코스모스"]
+      },
+      goodword: {
+        label: "좋은말",
+        correct: ["고마워", "사랑해", "괜찮아", "멋져", "응원해", "잘했어", "최고야", "함께하자", "힘내", "좋아"]
+      }
+    };
+
+    const BAD_WORDS = ["미워", "싫어", "바보", "짜증", "그만해", "몰라", "안해", "싫다"];
+
+    let app;
+    let auth;
+    let db;
+    let uid = null;
+
+    let myRole = null;
+    let myNickname = "";
+
+    let currentGame = null;
+    let currentPlayers = {};
+
+    let localClickedKeys = new Set();
+
+    let teacherWordTimer = null;
+    let teacherWordTimerKey = "";
+    let finishLock = false;
+
+    let audioCtx = null;
+    let playedFanfareEndedAt = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    const startScreen = $("startScreen");
+    const teacherLoginScreen = $("teacherLoginScreen");
+    const playerLoginScreen = $("playerLoginScreen");
+    const teacherScreen = $("teacherScreen");
+    const playerScreen = $("playerScreen");
+    const gameOverScreen = $("gameOverScreen");
+
+    function showOnly(screen) {
+      [startScreen, teacherLoginScreen, playerLoginScreen, teacherScreen, playerScreen].forEach((el) => {
+        el.classList.add("hidden");
+      });
+
+      screen.classList.remove("hidden");
+    }
+
+    function setStatus(id, text) {
+      $(id).textContent = text;
+    }
+
+    function getRoomPath(path = "") {
+      return `rooms/${ROOM_ID}${path ? "/" + path : ""}`;
+    }
+
+    function initFirebase() {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getDatabase(app);
+
+      signInAnonymously(auth).catch((error) => {
+        setStatus("startStatus", "익명 로그인 실패: " + error.message);
+      });
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) return;
+
+        uid = user.uid;
+        setStatus("startStatus", "Firebase 연결 완료. 입장할 수 있습니다.");
+
+        watchGame();
+        watchPlayers();
+      });
+    }
+
+    function watchGame() {
+      onValue(
+        ref(db, getRoomPath("game")),
+        (snapshot) => {
+          const beforeVersion = currentGame?.boardVersion;
+          currentGame = snapshot.val();
+
+          if (currentGame?.boardVersion !== beforeVersion) {
+            localClickedKeys.clear();
+          }
+
+          renderGame();
+        },
+        (error) => {
+          setStatus("startStatus", "Database 읽기 실패: 보안 규칙 설정이 필요합니다.");
+          console.error(error);
+        }
+      );
+
+      setInterval(updateTimers, 500);
+    }
+
+    function watchPlayers() {
+      onValue(
+        ref(db, getRoomPath("players")),
+        (snapshot) => {
+          currentPlayers = snapshot.val() || {};
+          renderPlayers();
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function randomId() {
+      if (crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+
+      return String(Date.now()) + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function makeWordBoard(categoryKey) {
+      const correctWords = WORDS[categoryKey].correct;
+      const otherWords = [];
+
+      Object.keys(WORDS).forEach((key) => {
+        if (key !== categoryKey) {
+          otherWords.push(...WORDS[key].correct);
+        }
+      });
+
+      const selectedCorrect = shuffle(correctWords).slice(0, 8).map((word) => ({
+        text: word,
+        correct: true,
+        id: randomId()
+      }));
+
+      const selectedWrong = shuffle([...otherWords, ...BAD_WORDS]).slice(0, 12).map((word) => ({
+        text: word,
+        correct: false,
+        id: randomId()
+      }));
+
+      return shuffle([...selectedCorrect, ...selectedWrong]);
+    }
+
+    async function updateWordBoard() {
+      if (!currentGame || currentGame.state !== "running") return;
+
+      const board = makeWordBoard(currentGame.category || "fruit");
+
+      await update(ref(db, getRoomPath("game")), {
+        words: board,
+        boardVersion: Date.now()
+      });
+    }
+
+    function ensureTeacherWordLoop() {
+      if (myRole !== "teacher" || !currentGame || currentGame.state !== "running") {
+        stopTeacherWordLoop();
+        return;
+      }
+
+      const key = `${currentGame.startedAt}-${currentGame.interval}`;
+
+      if (teacherWordTimer && teacherWordTimerKey === key) {
+        return;
+      }
+
+      stopTeacherWordLoop();
+
+      teacherWordTimerKey = key;
+      teacherWordTimer = setInterval(() => {
+        updateWordBoard();
+      }, currentGame.interval || 5000);
+    }
+
+    function stopTeacherWordLoop() {
+      if (teacherWordTimer) {
+        clearInterval(teacherWordTimer);
+        teacherWordTimer = null;
+        teacherWordTimerKey = "";
+      }
+    }
+
+    function getCategoryLabel(key) {
+      return WORDS[key]?.label || "대기 중";
+    }
+
+    function renderWords(containerId, words, clickable) {
+      const container = $(containerId);
+      container.innerHTML = "";
+
+      if (!words || words.length === 0) return;
+
+      words.forEach((word) => {
+        const btn = document.createElement("button");
+        btn.className = "word-card";
+        btn.textContent = word.text;
+
+        if (clickable) {
+          const clickedKey = `${currentGame?.boardVersion || 0}-${word.id}`;
+
+          if (localClickedKeys.has(clickedKey)) {
+            btn.classList.add("clicked");
+            btn.disabled = true;
+          }
+
+          btn.addEventListener("click", () => {
+            handleWordClick(word, clickedKey, btn);
+          });
+        } else {
+          btn.disabled = true;
+        }
+
+        container.appendChild(btn);
+      });
+    }
+
+    async function handleWordClick(word, clickedKey, button) {
+      if (!uid || !currentGame || currentGame.state !== "running") return;
+      if (localClickedKeys.has(clickedKey)) return;
+
+      localClickedKeys.add(clickedKey);
+      button.classList.add("clicked");
+      button.disabled = true;
+
+      const point = word.correct ? 1 : -1;
+
+      playSound(word.correct ? "correct" : "wrong");
+
+      const scoreRef = ref(db, getRoomPath(`players/${uid}/score`));
+
+      try {
+        await runTransaction(scoreRef, (currentScore) => {
+          return (currentScore || 0) + point;
+        });
+      } catch (error) {
+        $("playerGuide").textContent = "점수 저장 실패: Database 보안 규칙 설정이 필요합니다.";
+        console.error(error);
+      }
+    }
+
+    function renderPlayers() {
+      const players = Object.values(currentPlayers || {}).sort((a, b) => {
+        return (b.score || 0) - (a.score || 0);
+      });
+
+      const teacherPlayers = $("teacherPlayers");
+      teacherPlayers.innerHTML = "";
+
+      if (players.length === 0) {
+        teacherPlayers.innerHTML = "<div class='status'>아직 참가자가 없습니다.</div>";
+      } else {
+        players.forEach((player, index) => {
+          const div = document.createElement("div");
+          div.className = "player-item";
+          div.innerHTML = `
+            <span>${index + 1}. ${escapeHtml(player.name || "이름 없음")}</span>
+            <span>${player.score || 0}점</span>
+          `;
+          teacherPlayers.appendChild(div);
+        });
+      }
+
+      if (uid && currentPlayers[uid]) {
+        $("myScoreText").textContent = currentPlayers[uid].score || 0;
+      }
+    }
+
+    function renderGame() {
+      if (!currentGame) {
+        return;
+      }
+
+      const categoryLabel = getCategoryLabel(currentGame.category);
+      const intervalText = `${(currentGame.interval || 5000) / 1000}초`;
+
+      $("teacherCategoryText").textContent = categoryLabel;
+      $("teacherIntervalText").textContent = intervalText;
+
+      $("playerCategoryText").textContent =
+        currentGame.state === "running" ? categoryLabel : "대기 중";
+
+      renderWords("teacherWordGrid", currentGame.words || [], false);
+      renderWords("playerWordGrid", currentGame.words || [], currentGame.state === "running");
+
+      if (currentGame.state === "running") {
+        gameOverScreen.classList.add("hidden");
+        $("playerGuide").textContent = "주제에 맞는 단어만 클릭하세요!";
+        finishLock = false;
+      }
+
+      if (currentGame.state === "ended") {
+        stopTeacherWordLoop();
+        renderWinners();
+        gameOverScreen.classList.remove("hidden");
+        $("playerGuide").textContent = "게임이 종료되었습니다.";
+
+        if (playedFanfareEndedAt !== currentGame.endedAt) {
+          playedFanfareEndedAt = currentGame.endedAt;
+          playSound("fanfare");
+        }
+      }
+
+      ensureTeacherWordLoop();
+    }
+
+    function updateTimers() {
+      if (!currentGame || currentGame.state !== "running" || !currentGame.endsAt) {
+        $("teacherTimer").textContent = GAME_TIME;
+        $("playerTimer").textContent = GAME_TIME;
+        return;
+      }
+
+      const remain = Math.max(0, Math.ceil((currentGame.endsAt - Date.now()) / 1000));
+
+      $("teacherTimer").textContent = remain;
+      $("playerTimer").textContent = remain;
+
+      if (remain <= 0 && myRole === "teacher" && !finishLock) {
+        finishGame();
+      }
+    }
+
+    async function startGame() {
+      if (myRole !== "teacher") return;
+
+      finishLock = false;
+      playedFanfareEndedAt = null;
+
+      const category = $("categorySelect").value;
+      const interval = Number(document.querySelector(".intervalBtn.active")?.dataset.interval || 5000);
+      const now = Date.now();
+
+      try {
+        await update(ref(db, getRoomPath("game")), {
+          state: "running",
+          category,
+          interval,
+          startedAt: now,
+          endsAt: now + GAME_TIME * 1000,
+          winners: [],
+          boardVersion: now,
+          words: makeWordBoard(category)
+        });
+      } catch (error) {
+        alert("게임 시작 실패: Database 보안 규칙 설정이 필요합니다.");
+        console.error(error);
+      }
+    }
+
+    async function stopGame() {
+      if (myRole !== "teacher") return;
+      await finishGame();
+    }
+
+    async function finishGame() {
+      if (finishLock) return;
+
+      finishLock = true;
+
+      const players = Object.values(currentPlayers || {}).sort((a, b) => {
+        return (b.score || 0) - (a.score || 0);
+      });
+
+      const winners = players.slice(0, 3).map((player, index) => ({
+        rank: index + 1,
+        name: player.name || "이름 없음",
+        score: player.score || 0
+      }));
+
+      try {
+        await update(ref(db, getRoomPath("game")), {
+          state: "ended",
+          endedAt: Date.now(),
+          winners
+        });
+      } catch (error) {
+        alert("게임 종료 실패: Database 보안 규칙 설정이 필요합니다.");
+        console.error(error);
+      }
+    }
+
+    async function resetGame() {
+      if (myRole !== "teacher") return;
+
+      stopTeacherWordLoop();
+      finishLock = false;
+      playedFanfareEndedAt = null;
+
+      const updates = {};
+
+      Object.keys(currentPlayers || {}).forEach((playerUid) => {
+        updates[`players/${playerUid}/score`] = 0;
+      });
+
+      updates["game"] = {
+        state: "waiting",
+        category: "fruit",
+        interval: 5000,
+        words: [],
+        winners: [],
+        boardVersion: Date.now()
+      };
+
+      try {
+        await update(ref(db, getRoomPath()), updates);
+      } catch (error) {
+        alert("초기화 실패: Database 보안 규칙 설정이 필요합니다.");
+        console.error(error);
+      }
+    }
+
+    function renderWinners() {
+      const winners = currentGame?.winners || [];
+      const winnerList = $("winnerList");
+      winnerList.innerHTML = "";
+
+      if (winners.length === 0) {
+        winnerList.innerHTML = "<div class='rank-line'>순위 정보가 없습니다.</div>";
+        return;
+      }
+
+      const icons = ["🏆", "🥈", "🥉"];
+
+      winners.forEach((winner, index) => {
+        const div = document.createElement("div");
+        div.className = "rank-line";
+        div.textContent = `${icons[index] || ""} ${winner.rank}등 ${winner.name} - ${winner.score}점`;
+        winnerList.appendChild(div);
+      });
+    }
+
+    async function joinPlayer() {
+      const nickname = $("nicknameInput").value.trim();
+
+      if (!nickname) {
+        setStatus("playerLoginStatus", "이름을 입력해 주세요.");
+        return;
+      }
+
+      if (!uid) {
+        setStatus("playerLoginStatus", "Firebase 연결 중입니다. 잠시 후 다시 눌러 주세요.");
+        return;
+      }
+
+      myRole = "player";
+      myNickname = nickname;
+
+      try {
+        await set(ref(db, getRoomPath(`players/${uid}`)), {
+          uid,
+          name: nickname,
+          score: 0,
+          joinedAt: Date.now()
+        });
+
+        $("myNameText").textContent = nickname;
+        showOnly(playerScreen);
+      } catch (error) {
+        setStatus("playerLoginStatus", "참여자 입장 실패: Database 보안 규칙 설정이 필요합니다.");
+        console.error(error);
+      }
+    }
+
+    async function loginTeacher() {
+      const password = $("teacherPasswordInput").value;
+
+      if (!password) {
+        setStatus("teacherLoginStatus", "비밀번호를 입력해 주세요.");
+        return;
+      }
+
+      if (!uid) {
+        setStatus("teacherLoginStatus", "Firebase 연결 중입니다. 잠시 후 다시 눌러 주세요.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/check-admin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            password,
+            uid
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.ok) {
+          setStatus("teacherLoginStatus", "비밀번호가 맞지 않습니다.");
+          return;
+        }
+
+        myRole = "teacher";
+        showOnly(teacherScreen);
+      } catch (error) {
+        setStatus(
+          "teacherLoginStatus",
+          "아직 /api/check-admin.js 파일이 없어서 강사 로그인이 작동하지 않습니다. 다음 단계에서 만들면 됩니다."
+        );
+        console.error(error);
+      }
+    }
+
+    function initButtons() {
+      $("showTeacherBtn").addEventListener("click", () => showOnly(teacherLoginScreen));
+      $("showPlayerBtn").addEventListener("click", () => showOnly(playerLoginScreen));
+
+      $("backFromTeacherBtn").addEventListener("click", () => showOnly(startScreen));
+      $("backFromPlayerBtn").addEventListener("click", () => showOnly(startScreen));
+
+      $("teacherLoginBtn").addEventListener("click", loginTeacher);
+      $("joinPlayerBtn").addEventListener("click", joinPlayer);
+
+      $("startGameBtn").addEventListener("click", startGame);
+      $("stopGameBtn").addEventListener("click", stopGame);
+      $("resetGameBtn").addEventListener("click", resetGame);
+
+      document.querySelectorAll(".intervalBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".intervalBtn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          $("teacherIntervalText").textContent = `${Number(btn.dataset.interval) / 1000}초`;
+        });
+      });
+
+      $("categorySelect").addEventListener("change", () => {
+        $("teacherCategoryText").textContent = getCategoryLabel($("categorySelect").value);
+      });
+
+      $("teacherPasswordInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          loginTeacher();
+        }
+      });
+
+      $("nicknameInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          joinPlayer();
+        }
+      });
+    }
+
+    function playSound(type) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+
+        if (type === "correct") {
+          tone(660, 0.08);
+          setTimeout(() => tone(880, 0.08), 90);
+        }
+
+        if (type === "wrong") {
+          tone(180, 0.15);
+        }
+
+        if (type === "fanfare") {
+          tone(523, 0.12);
+          setTimeout(() => tone(659, 0.12), 140);
+          setTimeout(() => tone(784, 0.12), 280);
+          setTimeout(() => tone(1046, 0.25), 420);
+        }
+      } catch (error) {
+        console.log("sound error", error);
+      }
+    }
+
+    function tone(freq, duration) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.frequency.value = freq;
+      osc.type = "sine";
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    initButtons();
+    initFirebase();
+  </script>
+</body>
+</html>
