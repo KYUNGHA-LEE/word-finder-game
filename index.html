@@ -3,206 +3,287 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>실시간 단어 찾기 게임</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+  <title>실시간 단어 찾기 게임</title><style>
+  * {
+    box-sizing: border-box;
+  }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f7ff;
-      color: #222;
-    }
+  body {
+    margin: 0;
+    font-family: "Arial", "Pretendard", sans-serif;
+    color: #4b4963;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.95), rgba(255,255,255,0) 18%),
+      radial-gradient(circle at 80% 15%, rgba(255,245,252,0.9), rgba(255,255,255,0) 20%),
+      radial-gradient(circle at 15% 75%, rgba(240,250,255,0.9), rgba(255,255,255,0) 18%),
+      linear-gradient(180deg, #cfe5ff 0%, #e8d8ff 45%, #fff4f7 100%);
+    min-height: 100vh;
+  }
 
-    header {
-      padding: 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #6c8cff, #9f7cff);
-      color: white;
-    }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,0.55) 0 50px, transparent 52px),
+      radial-gradient(circle at 23% 14%, rgba(255,255,255,0.5) 0 38px, transparent 40px),
+      radial-gradient(circle at 74% 16%, rgba(255,255,255,0.55) 0 45px, transparent 47px),
+      radial-gradient(circle at 82% 20%, rgba(255,255,255,0.45) 0 30px, transparent 32px),
+      radial-gradient(circle at 85% 72%, rgba(255,255,255,0.4) 0 34px, transparent 36px),
+      radial-gradient(circle at 20% 82%, rgba(255,255,255,0.4) 0 28px, transparent 30px);
+    opacity: 0.7;
+    z-index: 0;
+  }
 
+  header {
+    position: relative;
+    z-index: 1;
+    padding: 34px 20px 30px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(124,154,255,0.88), rgba(195,141,255,0.85));
+    color: white;
+    box-shadow: 0 8px 24px rgba(110, 119, 190, 0.18);
+    backdrop-filter: blur(6px);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(92, 88, 140, 0.18);
+  }
+
+  header p {
+    margin: 12px 0 0;
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 0.96;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 16px 40px;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 28px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 14px 35px rgba(130, 132, 180, 0.16);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .screen-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 16px;
+    color: #5e5a85;
+  }
+
+  button {
+    border: 0;
+    border-radius: 18px;
+    padding: 14px 20px;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0 8px 18px rgba(139, 150, 214, 0.18);
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  button:not(.secondary):not(.danger):not(.good) {
+    background: linear-gradient(135deg, #7d9bff, #8a7cff);
+    color: white;
+  }
+
+  button.secondary {
+    background: linear-gradient(135deg, #f2f5ff, #ece6ff);
+    color: #655f98;
+  }
+
+  button.good {
+    background: linear-gradient(135deg, #67d8b0, #48c79a);
+    color: white;
+  }
+
+  button.danger {
+    background: linear-gradient(135deg, #ff8fa7, #ff7394);
+    color: white;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .intervalBtn.active {
+    background: linear-gradient(135deg, #8d85ff, #b88bff);
+    color: white;
+    outline: 3px solid rgba(214, 206, 255, 0.9);
+  }
+
+  input,
+  select {
+    border: 2px solid #e3ddff;
+    background: rgba(255,255,255,0.85);
+    border-radius: 16px;
+    padding: 13px 14px;
+    font-size: 16px;
+    min-width: 190px;
+    color: #5c577e;
+    outline: none;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #bba9ff;
+    box-shadow: 0 0 0 4px rgba(204, 191, 255, 0.35);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .status {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(240,242,255,0.95), rgba(255,245,252,0.95));
+    border: 1px solid rgba(220, 220, 255, 0.8);
+    font-weight: 800;
+    line-height: 1.6;
+    color: #59557d;
+  }
+
+  .timer {
+    font-size: 42px;
+    font-weight: 900;
+    color: #ff7ca8;
+    text-shadow: 0 2px 8px rgba(255, 190, 210, 0.45);
+  }
+
+  .score-big {
+    font-size: 36px;
+    font-weight: 900;
+    color: #7b74c9;
+  }
+
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(100px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .word-card {
+    min-height: 84px;
+    border-radius: 22px;
+    border: 2px solid rgba(235, 231, 255, 0.95);
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,244,255,0.92));
+    color: #625d89;
+    font-size: 24px;
+    font-weight: 900;
+    box-shadow: 0 10px 20px rgba(171, 170, 216, 0.14);
+  }
+
+  .word-card.clicked {
+    background: linear-gradient(180deg, #efedf5, #e4e1ee);
+    color: #9d99b1;
+    border-color: #ddd8ea;
+    box-shadow: none;
+  }
+
+  .player-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .player-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(248,249,255,0.95), rgba(255,246,251,0.95));
+    border: 1px solid rgba(231, 226, 255, 0.9);
+    font-weight: 800;
+    color: #5d5885;
+  }
+
+  .winner-box {
+    text-align: center;
+    padding: 28px 22px;
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255,251,240,0.96), rgba(255,241,248,0.96));
+    border: 2px solid rgba(255, 220, 170, 0.9);
+    box-shadow: 0 14px 35px rgba(255, 210, 180, 0.18);
+  }
+
+  .winner-box h2 {
+    font-size: 36px;
+    margin: 0 0 14px;
+    color: #ff8da5;
+  }
+
+  .rank-line {
+    font-size: 24px;
+    font-weight: 900;
+    margin: 10px 0;
+    color: #6a618f;
+  }
+
+  @media (max-width: 700px) {
     h1 {
-      margin: 0;
-      font-size: 30px;
+      font-size: 31px;
     }
 
     header p {
-      margin: 8px 0 0;
-      font-weight: 700;
-    }
-
-    main {
-      max-width: 1100px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 16px;
       font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      background: #5b7cff;
-      color: white;
     }
 
-    button.secondary {
-      background: #eef1ff;
-      color: #3043a0;
+    .word-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
 
-    button.danger {
-      background: #ff5b6e;
-    }
-
-    button.good {
-      background: #35b779;
-    }
-
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .intervalBtn.active {
-      background: #3043a0;
-      color: white;
-      outline: 3px solid #cdd5ff;
-    }
-
-    input,
-    select {
-      border: 2px solid #d8defa;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 16px;
-      min-width: 180px;
-    }
-
-    .hidden {
-      display: none !important;
+    .word-card {
+      font-size: 20px;
+      min-height: 72px;
     }
 
     .screen-title {
       font-size: 22px;
-      font-weight: 900;
-      margin-bottom: 12px;
     }
 
-    .status {
-      padding: 12px;
-      border-radius: 12px;
-      background: #f0f3ff;
-      font-weight: 700;
-      margin-top: 12px;
-      line-height: 1.5;
+    button {
+      font-size: 16px;
+      padding: 12px 16px;
     }
-
-    .timer {
-      font-size: 42px;
-      font-weight: 900;
-      color: #ff4e6a;
-    }
-
-    .word-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(100px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .word-card {
-      min-height: 78px;
-      border-radius: 18px;
-      background: white;
-      border: 3px solid #dfe4ff;
-      color: #222;
-      font-size: 24px;
-      font-weight: 900;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .word-card.clicked {
-      background: #eeeeee;
-      color: #999;
-      border-color: #ddd;
-    }
-
-    .score-big {
-      font-size: 34px;
-      font-weight: 900;
-      color: #3043a0;
-    }
-
-    .player-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .player-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: #f7f8ff;
-      font-weight: 800;
-    }
-
-    .winner-box {
-      text-align: center;
-      padding: 24px;
-      border-radius: 22px;
-      background: #fff6d7;
-      border: 3px solid #ffd45a;
-    }
-
-    .winner-box h2 {
-      font-size: 34px;
-      margin: 0 0 12px;
-    }
-
-    .rank-line {
-      font-size: 24px;
-      font-weight: 900;
-      margin: 8px 0;
-    }
-
-    @media (max-width: 700px) {
-      .word-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .word-card {
-        font-size: 20px;
-        min-height: 68px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
