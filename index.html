@@ -5,20 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>실시간 단어 찾기 게임</title>
   <style>
+  :root {
+    --color-electric-cobalt: #244cff;
+    --color-parchment: #f7f7f1;
+    --color-snow: #ffffff;
+    --color-ice-wash: #e8f8ff;
+    --color-obsidian: #1d1f21;
+    --color-graphite: #2b2b2b;
+    --color-ash: #878787;
+    --color-fog: #b0b0b0;
+    --color-lavender-mist: #c3aeff;
+    --color-blush: #fcc2cd;
+    --color-buttercream: #fced9f;
+  }
+
   * {
     box-sizing: border-box;
   }
 
   body {
     margin: 0;
-    font-family: "Arial", "Pretendard", sans-serif;
-    color: #4b4963;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.95), rgba(255,255,255,0) 18%),
-      radial-gradient(circle at 80% 15%, rgba(255,245,252,0.9), rgba(255,255,255,0) 20%),
-      radial-gradient(circle at 15% 75%, rgba(240,250,255,0.9), rgba(255,255,255,0) 18%),
-      linear-gradient(180deg, #cfe5ff 0%, #e8d8ff 45%, #fff4f7 100%);
     min-height: 100vh;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--color-parchment);
+    color: var(--color-graphite);
   }
 
   body::before {
@@ -27,87 +37,97 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 12% 18%, rgba(255,255,255,0.55) 0 50px, transparent 52px),
-      radial-gradient(circle at 23% 14%, rgba(255,255,255,0.5) 0 38px, transparent 40px),
-      radial-gradient(circle at 74% 16%, rgba(255,255,255,0.55) 0 45px, transparent 47px),
-      radial-gradient(circle at 82% 20%, rgba(255,255,255,0.45) 0 30px, transparent 32px),
-      radial-gradient(circle at 85% 72%, rgba(255,255,255,0.4) 0 34px, transparent 36px),
-      radial-gradient(circle at 20% 82%, rgba(255,255,255,0.4) 0 28px, transparent 30px);
-    opacity: 0.7;
+      radial-gradient(circle at 8% 12%, rgba(195, 174, 255, 0.32), transparent 22%),
+      radial-gradient(circle at 88% 16%, rgba(252, 194, 205, 0.35), transparent 20%),
+      radial-gradient(circle at 70% 86%, rgba(252, 237, 159, 0.35), transparent 22%);
     z-index: 0;
   }
 
   header {
     position: relative;
     z-index: 1;
-    padding: 34px 20px 30px;
-    text-align: center;
-    background: linear-gradient(135deg, rgba(124,154,255,0.88), rgba(195,141,255,0.85));
-    color: white;
-    box-shadow: 0 8px 24px rgba(110, 119, 190, 0.18);
-    backdrop-filter: blur(6px);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 42px 24px 24px;
+    background: transparent;
+    color: var(--color-graphite);
+    text-align: left;
   }
 
   h1 {
     margin: 0;
-    font-size: 46px;
-    font-weight: 900;
-    letter-spacing: -1px;
-    text-shadow: 0 2px 10px rgba(92, 88, 140, 0.18);
+    max-width: 760px;
+    font-size: clamp(38px, 6vw, 60px);
+    line-height: 1.18;
+    font-weight: 400;
+    letter-spacing: -1.8px;
+    color: #000000;
   }
 
   header p {
-    margin: 12px 0 0;
+    margin: 16px 0 0;
+    max-width: 620px;
     font-size: 18px;
-    font-weight: 800;
-    opacity: 0.96;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--color-graphite);
   }
 
   main {
     position: relative;
     z-index: 1;
-    max-width: 1100px;
-    margin: 28px auto;
-    padding: 0 16px 40px;
+    max-width: 1200px;
+    margin: 24px auto 60px;
+    padding: 0 24px;
   }
 
   .card {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.8);
-    border-radius: 28px;
-    padding: 24px;
+    background: var(--color-snow);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 28px;
     margin-bottom: 20px;
-    box-shadow: 0 14px 35px rgba(130, 132, 180, 0.16);
+    box-shadow: none;
   }
 
   .row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
   }
 
+  .hidden {
+    display: none !important;
+  }
+
   .screen-title {
-    font-size: 24px;
-    font-weight: 900;
-    margin-bottom: 16px;
-    color: #5e5a85;
+    margin-bottom: 18px;
+    font-size: 30px;
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: -0.7px;
+    color: #000000;
+  }
+
+  p {
+    color: var(--color-graphite);
+    line-height: 1.55;
   }
 
   button {
     border: 0;
-    border-radius: 18px;
-    padding: 14px 20px;
-    font-size: 18px;
-    font-weight: 900;
+    border-radius: 100px;
+    padding: 12px 24px;
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 500;
     cursor: pointer;
-    transition: 0.2s ease;
-    box-shadow: 0 8px 18px rgba(139, 150, 214, 0.18);
+    transition: transform 0.15s ease, opacity 0.15s ease;
   }
 
   button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   button:active {
@@ -115,23 +135,25 @@
   }
 
   button:not(.secondary):not(.danger):not(.good) {
-    background: linear-gradient(135deg, #7d9bff, #8a7cff);
-    color: white;
+    background: var(--color-electric-cobalt);
+    color: #ffffff;
   }
 
   button.secondary {
-    background: linear-gradient(135deg, #f2f5ff, #ece6ff);
-    color: #655f98;
+    background: #ffffff;
+    color: var(--color-graphite);
+    border: 1px solid var(--color-fog);
   }
 
   button.good {
-    background: linear-gradient(135deg, #67d8b0, #48c79a);
-    color: white;
+    background: var(--color-obsidian);
+    color: #ffffff;
   }
 
   button.danger {
-    background: linear-gradient(135deg, #ff8fa7, #ff7394);
-    color: white;
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
   }
 
   button:disabled {
@@ -141,85 +163,127 @@
   }
 
   .intervalBtn.active {
-    background: linear-gradient(135deg, #8d85ff, #b88bff);
-    color: white;
-    outline: 3px solid rgba(214, 206, 255, 0.9);
+    background: var(--color-electric-cobalt);
+    color: #ffffff;
+    border-color: var(--color-electric-cobalt);
   }
 
   input,
   select {
-    border: 2px solid #e3ddff;
-    background: rgba(255,255,255,0.85);
-    border-radius: 16px;
-    padding: 13px 14px;
-    font-size: 16px;
     min-width: 190px;
-    color: #5c577e;
+    border: 1px solid var(--color-fog);
+    border-radius: 100px;
+    padding: 12px 18px;
+    background: #ffffff;
+    color: var(--color-graphite);
+    font-size: 15px;
+    font-weight: 400;
     outline: none;
   }
 
   input:focus,
   select:focus {
-    border-color: #bba9ff;
-    box-shadow: 0 0 0 4px rgba(204, 191, 255, 0.35);
+    border-color: var(--color-electric-cobalt);
+    box-shadow: 0 0 0 3px rgba(36, 76, 255, 0.12);
   }
 
-  .hidden {
-    display: none !important;
+  label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-graphite);
   }
 
   .status {
-    margin-top: 14px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(240,242,255,0.95), rgba(255,245,252,0.95));
-    border: 1px solid rgba(220, 220, 255, 0.8);
-    font-weight: 800;
-    line-height: 1.6;
-    color: #59557d;
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--color-ice-wash);
+    color: var(--color-graphite);
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 400;
   }
 
   .timer {
-    font-size: 42px;
-    font-weight: 900;
-    color: #ff7ca8;
-    text-shadow: 0 2px 8px rgba(255, 190, 210, 0.45);
+    display: inline-block;
+    min-width: 64px;
+    font-size: 38px;
+    line-height: 1;
+    font-weight: 400;
+    color: var(--color-electric-cobalt);
+    vertical-align: middle;
   }
 
   .score-big {
-    font-size: 36px;
-    font-weight: 900;
-    color: #7b74c9;
+    font-size: 38px;
+    line-height: 1.2;
+    font-weight: 400;
+    color: var(--color-electric-cobalt);
+  }
+
+  #teacherScreen,
+  #playerScreen {
+    display: block;
+  }
+
+  #teacherScreen.hidden,
+  #playerScreen.hidden {
+    display: none !important;
+  }
+
+  #teacherScreen .card:nth-child(3),
+  #playerScreen .card:nth-child(2) {
+    background: var(--color-obsidian);
+    color: #ffffff;
+    border-radius: 16px;
+    border: 0;
+    padding: 28px;
+  }
+
+  #teacherScreen .card:nth-child(3) .screen-title,
+  #playerScreen .card:nth-child(2) .screen-title {
+    color: #ffffff;
+  }
+
+  #playerScreen .card:nth-child(2) .status {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .word-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(100px, 1fr));
-    gap: 14px;
-    margin-top: 18px;
+    gap: 10px;
+    margin-top: 20px;
   }
 
   .word-card {
-    min-height: 84px;
-    border-radius: 22px;
-    border: 2px solid rgba(235, 231, 255, 0.95);
-    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,244,255,0.92));
-    color: #625d89;
-    font-size: 24px;
-    font-weight: 900;
-    box-shadow: 0 10px 20px rgba(171, 170, 216, 0.14);
+    min-height: 76px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #2b2d31;
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .word-card:hover {
+    background: var(--color-electric-cobalt);
+    color: #ffffff;
   }
 
   .word-card.clicked {
-    background: linear-gradient(180deg, #efedf5, #e4e1ee);
-    color: #9d99b1;
-    border-color: #ddd8ea;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.38);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .player-list {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     margin-top: 12px;
   }
 
@@ -227,43 +291,84 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px 16px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(248,249,255,0.95), rgba(255,246,251,0.95));
-    border: 1px solid rgba(231, 226, 255, 0.9);
-    font-weight: 800;
-    color: #5d5885;
+    padding: 14px 16px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--color-graphite);
+    font-size: 16px;
+    font-weight: 500;
   }
 
   .winner-box {
-    text-align: center;
-    padding: 28px 22px;
-    border-radius: 30px;
-    background: linear-gradient(180deg, rgba(255,251,240,0.96), rgba(255,241,248,0.96));
-    border: 2px solid rgba(255, 220, 170, 0.9);
-    box-shadow: 0 14px 35px rgba(255, 210, 180, 0.18);
+    text-align: left;
+    padding: 36px;
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(232, 248, 255, 0.95), rgba(255, 255, 255, 0.98)),
+      #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .winner-box h2 {
-    font-size: 36px;
-    margin: 0 0 14px;
-    color: #ff8da5;
+    margin: 0 0 18px;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -1.4px;
+    color: #000000;
   }
 
   .rank-line {
-    font-size: 24px;
-    font-weight: 900;
     margin: 10px 0;
-    color: #6a618f;
+    padding: 14px 16px;
+    border-radius: 6px;
+    background: #ffffff;
+    color: var(--color-graphite);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 500;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
-  @media (max-width: 700px) {
-    h1 {
-      font-size: 31px;
+  #startScreen {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 24px;
+    align-items: center;
+    min-height: 280px;
+  }
+
+  #startScreen .screen-title {
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.2;
+  }
+
+  #startScreen .row {
+    align-self: center;
+  }
+
+  #startStatus {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 800px) {
+    header {
+      padding: 32px 18px 18px;
+      text-align: left;
     }
 
-    header p {
-      font-size: 16px;
+    main {
+      padding: 0 18px 40px;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    #startScreen {
+      display: block;
+      min-height: auto;
     }
 
     .word-grid {
@@ -271,17 +376,22 @@
     }
 
     .word-card {
-      font-size: 20px;
-      min-height: 72px;
+      min-height: 68px;
+      font-size: 19px;
     }
 
     .screen-title {
-      font-size: 22px;
+      font-size: 26px;
     }
 
     button {
-      font-size: 16px;
-      padding: 12px 16px;
+      padding: 11px 18px;
+      font-size: 15px;
+    }
+
+    input,
+    select {
+      width: 100%;
     }
   }
 </style>
